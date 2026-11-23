@@ -2,9 +2,9 @@ const models = require('../models')
 
 const create = async (req, res) => {
   const userId = req.user.id
-  let { title } = req.body
+  const { title } = req.body ?? {}
   
-  if (!title) res.status(400).end('no title')
+  if (!title) return res.status(400).end('no title')
 
   const board = models.Board.build({ title, userId })
   await board.save()
@@ -46,7 +46,7 @@ const get = async (req, res) => {
 
 const update = async (req, res) => {
   const { id } = req.params
-  let body = req.body
+  const body = req.body ?? {}
 
   let board = await models.Board.findOne({ where: { id } })
 

@@ -1,11 +1,7 @@
 const Sequelize = require('sequelize')
-const Op = Sequelize.Op
-
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: './db-dev.sqlite',
-  // https://github.com/sequelize/sequelize/issues/8417
-  operatorsAliases: Sequelize.Op,
+  storage: process.env.SQLITE_STORAGE ?? './db-dev.sqlite',
   logging: console.log
 });
 
@@ -60,7 +56,6 @@ List.hasMany(Card)
 
 module.exports = { 
   sequelize, 
-  Op,
   User,
   Board,
   List,

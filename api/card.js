@@ -2,10 +2,10 @@ const models = require('../models')
 
 const create = async (req, res) => {
   const userId = req.user.id
-  let { title, listId, pos } = req.body
+  const { title, listId, pos } = req.body ?? {}
 
-  if (!title) res.status(400).end('no title')
-  if (!listId) res.status(400).end('no listId')
+  if (!title) return res.status(400).end('no title')
+  if (!listId) return res.status(400).end('no listId')
 
   const card = models.Card.build({ title, pos, listId, userId })
   await card.save()
@@ -26,7 +26,7 @@ const get = async (req, res) => {
 
 const update = async (req, res) => {
   const {id} = req.params
-  let body = req.body
+  const body = req.body ?? {}
 
   if (!id) return res.status(400).json({error: 'no id'})
 

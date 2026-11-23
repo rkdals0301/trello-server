@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken')
 const secret = 'token secret';
 const expiresIn = 365 * 24 * 3600; // 365 days
+const algorithm = 'HS256'
 
 const auth = {
   signToken(id) {
-    return jwt.sign({ id }, secret, { expiresIn })
+    return jwt.sign({ id }, secret, { algorithm, expiresIn })
   },
   ensureAuth() {
     return (req, res, next) => {
@@ -25,7 +26,7 @@ const auth = {
     }
   },
   verify(token) {
-    return jwt.verify(token.replace(/^Bearer\s/, ''), secret)
+    return jwt.verify(token.replace(/^Bearer\s/, ''), secret, { algorithms: [algorithm] })
   }
 }
 
