@@ -1,5 +1,4 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const logger = require('morgan')
 const cors = require('cors')
 
@@ -13,8 +12,8 @@ const app = express()
 
 app.use(cors())
 app.use(logger('dev'))
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 app.use(express.static('public'))
 
 app.post('/login', auth.login)
@@ -46,9 +45,10 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-  console.log(err)
-  res.status(res.statusCode || 500)
-  res.json({ error: err.message || 'internal server error' })
+  if (res.headersSent) return next(err)
+  const status = err.status ?? (res.statusCode >= 400 ? res.statusCode : 500)
+  if (status >= 500) console.error(err)
+  res.status(status).json({ error: err.message || 'internal server error' })
 })
 
 module.exports = app

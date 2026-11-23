@@ -2,11 +2,11 @@ const models = require('../models')
 
 const create = async (req, res) => {
   const userId = req.user.id
-  let { title, boardId, pos } = req.body
+  const { title, boardId, pos } = req.body ?? {}
 
-  if (!title) res.status(400).end('no title')
-  if (!boardId) res.status(400).end('no boardId')
-  if (!pos) res.status(400).end('no pos')
+  if (!title) return res.status(400).end('no title')
+  if (!boardId) return res.status(400).end('no boardId')
+  if (!pos) return res.status(400).end('no pos')
 
   const list = models.List.build({ title, pos, boardId, userId })
   await list.save()
@@ -27,7 +27,7 @@ const get = async (req, res) => {
 
 const update = async (req, res) => {
   const {id} = req.params
-  let body = req.body
+  const body = req.body ?? {}
 
   if (!id) return res.status(400).json({error: 'no id'})
 
@@ -53,20 +53,9 @@ const destroy = async (req, res) => {
   const { id } = req.params
   if (!id) return res.status(400).json({ error: 'no id' })
 
-  const cardIds = await models.Card.findAll({
-    where: { listId: id }
-  }).map(card => card.id)
-
-  if (cardIds.length) {
-    await models.Card.destroy({
-      where: {
-        id: { [models.Op.in]: cardIds }
-      }
-    })
-  }
-
-  await models.List.destroy({
-    where: { id }
+  await models.sequelize.transaction(async transaction => {
+    await models.Card.destroy({ where: { listId: id }, transaction })
+    await models.List.destroy({ where: { id }, transaction })
   })
 
   res.status(204).end()
